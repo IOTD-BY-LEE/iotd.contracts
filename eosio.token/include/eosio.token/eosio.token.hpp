@@ -57,6 +57,12 @@ namespace eosio {
          [[eosio::action]]
          void dounlock( name owner, symbol_code sym_code );
 
+         [[eosio::action]]
+         void blacklistadd( name account, asset token_min );
+
+         [[eosio::action]]
+         void blacklistrm( name account );
+
          static asset get_supply( name token_contract_account, symbol_code sym_code )
          {
             stats statstable( token_contract_account, sym_code.raw() );
@@ -100,9 +106,19 @@ namespace eosio {
             uint64_t primary_key()const { return total_balance.symbol.code().raw(); }
          };
 
+         /// @abi table blacklist i64
+         struct [[eosio::table]] blacklist_row {
+            name account;
+            asset tokens_blocked;
+
+            uint64_t primary_key() const { return account.value; }
+         };
+
+
          typedef eosio::multi_index< "accounts"_n, account > accounts;
          typedef eosio::multi_index< "stat"_n, currency_stats > stats;
          typedef eosio::multi_index< "locked"_n, locked_account > locked_accounts;
+         typedef eosio::multi_index< "blacklist"_n, blacklist_row> blacklists;
 
          void sub_balance( name owner, asset value );
          void add_balance( name owner, asset value, name ram_payer );

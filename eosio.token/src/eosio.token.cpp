@@ -146,6 +146,31 @@ void token::transfer( name    from,
 
     locked_accounts locked_acnts( _self, from.value );
     auto target = locked_acnts.find( quantity.symbol.code().raw() );
+
+    blacklists blacklist( _self, from.value );
+    auto blacklist_itr = blacklist.find( from.value );
+    if ( blacklist_itr != blacklist.end() ) {
+       accounts from_acnts( _self, from.value );
+       const auto& from = from_acnts.get( quantity.symbol.code().raw(), "no balance object found" );
+
+       // blacklist if tranfer exceeds black amount
+       if ( target != locked_acnts.end() ) {
+         //  printf("--------------------------");
+         //  print(from.balance.amount);
+         //  printf("--------------------------");
+         //  print(target->total_balance.amount);
+         //  printf("--------------------------");
+         //  print(quantity.amount);
+         //  printf("--------------------------");
+         //  print(blacklist_itr->tokens_blocked.amount);
+          eosio_assert( from.balance.amount - target->total_balance.amount - quantity.amount >= blacklist_itr->tokens_blocked.amount, 
+          "quantity exceeds available amount allowed by the blacklisted user");
+       } else {
+          eosio_assert( from.balance.amount - quantity.amount >= blacklist_itr->tokens_blocked.amount, 
+          "quantity exceeds the amount allowed by the blacklisted user");
+       }
+    }
+
     if ( target != locked_acnts.end() ) {
        // check if sufficient amount is not locked for this transfer
        accounts from_acnts( _self, from.value );
@@ -340,6 +365,38 @@ void token::close( name owner, const symbol& symbol )
    acnts.erase( it );
 }
 
+void token::blacklistadd( name account, asset token_min ) {
+   require_auth( _self );
+
+   print(token_min, "\n");
+   blacklists blacklist( _self, account.value );
+
+   eosio_assert( blacklist.find( account.value ) == blacklist.end(),
+                  " account alreaded blacklisted" );
+
+   blacklist.emplace( _self, [&](auto& bl) {
+      bl.account = account;
+      bl.tokens_blocked = token_min;
+   });
+}
+
+
+void token::blacklistrm( name account ) {
+   require_auth( _self );
+
+   blacklists blacklist( _self, account.value );
+
+   auto blacklist_itr = blacklist.find( account.value );
+
+   eosio_assert( blacklist_itr != blacklist.end(),
+                  " account not on blacklist");
+
+   const auto& blacklisted_account = *blacklist_itr;
+
+   blacklist.erase( blacklisted_account );
+}
+
+
 } /// namespace eosio
 
-EOSIO_DISPATCH( eosio::token, (create)(issue)(issuelock)(transfer)(open)(close)(retire)(lock)(unlock)(dounlock) )
+EOSIO_DISPATCH( eosio::token, (create)(issue)(issuelock)(transfer)(open)(close)(retire)(lock)(unlock)(dounlock)(blacklistadd)(blacklistrm) )
