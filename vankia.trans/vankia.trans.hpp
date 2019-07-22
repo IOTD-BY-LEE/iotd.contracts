@@ -17,6 +17,17 @@ typedef uint64_t time64;
 #define BOOL_NAGETIVE 0
 #define IPFS_HASH_LENGHT 46
 
+enum ensure_right_class : uint8_t  // 卡片的类型 总共五种属性类型,总共17张卡牌
+{
+    EMPTY = 0,        // 空
+    COLLECTION = 1,   // 采集确权
+    INCOME = 2,       // 数据收益权确权
+    USUFRUCT = 3,     // 数据使用权确权
+    TRANSFER = 4,     // 数据转让权确权
+    REWARD = 5,       // 平台任务奖励确权
+    OTHER = 99        // 其他
+};
+
 struct account_record_content
 {
 
@@ -67,6 +78,8 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     [[eosio::action]]
     void deposit(name from, vector<account_record_content> content);
     [[eosio::action]]
+    void batchtransfer(name from, vector<account_record_content> content);
+    [[eosio::action]]
     void withdraw(name from, asset assets);
     [[eosio::action]]
     inline asset getassets(name owner);
@@ -74,8 +87,11 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     void listrecord(name from, uint64_t seq, string hash, vector<account_record_content> trans_list);
     [[eosio::action]]
     void authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer);
+    [[eosio::action]]
+    void ensurerightreg(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass);
 
   private:
+
     // @abi table
     struct [[eosio::table]] accountlist
     {
@@ -126,10 +142,21 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
         }
     };
 
+        /// @abi table
+    struct [[eosio::table]] ensurergtlst
+    {
+        name                ensureaccount;        /// 确权用户，主键唯一的无符号8位整型
+        uint64_t            totalrights;          /// 该用户总计确权数量
+        time_point_sec      last_update_time;     /// 最后确权时间
+
+        auto primary_key() const { return ensureaccount.value; }
+    };
+
     typedef eosio::multi_index< "accountlist"_n, accountlist> account_list;
     typedef eosio::multi_index< "depositlist"_n, depositlist> deposit_list;
     typedef eosio::multi_index< "withdrawlist"_n, withdrawlist> withdraw_list;
     typedef eosio::multi_index< "authrightlst"_n, authrightlst, indexed_by<"byipfskey"_n, const_mem_fun<authrightlst, fixed_bytes<32>, &authrightlst::get_ipfskey>>> authright_list;
+    typedef eosio::multi_index< "ensurergtlst"_n, ensurergtlst> ensurergt_list;
 };
 
 } // namespace vankia

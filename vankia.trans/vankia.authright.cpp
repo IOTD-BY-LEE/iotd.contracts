@@ -1,6 +1,42 @@
 namespace vankia
 {
 
+//1.采集确权：MD5 HASH 采集确权
+//2.数据收益权确权：MD5 HASH 数据源帐号 确权类型
+//3.数据收益权确权：MD5 HASH 购买帐号 确权类型
+//4.数据转让权确权：MD5 HASH 购买帐号 确权类型
+// using ensurerightreg::authright_table;
+/// @abi action
+void trans::ensurerightreg(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass)
+{
+  //获取授权，如果没有授权，Action调用会中止，事务会回滚
+  require_auth(agent);
+
+  //实例化address数据表（multi_index），参数用于建立对表的访问权限
+  //如果访问自己的合约则具有读写权限，访问其他人的合约则具有只读权限
+  ensurergt_list ensurergtlst(_self, _self.value);
+
+  //multi_index的find函数通过主键（primary_key）查询数据，返回迭代器itr
+  //auto关键字会自动匹配类型
+  auto iterator = ensurergtlst.find(agent.value);
+  if (iterator == ensurergtlst.end())
+  {
+      iterator = ensurergtlst.emplace(_self, [&](auto &tmp_record) {
+          tmp_record.ensureaccount = agent;
+          tmp_record.totalrights = 1;
+          tmp_record.last_update_time = time_point_sec();
+      });
+  }
+  else
+  {
+      ensurergtlst.modify(iterator, same_payer, [&](auto &tmp_record) {
+          tmp_record.totalrights += 1;
+          tmp_record.last_update_time = time_point_sec();
+      });
+  }
+}
+
+
 // using authright::authright_table;
 /// @abi action
 void trans::authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer)
