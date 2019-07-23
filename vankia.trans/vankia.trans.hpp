@@ -17,7 +17,7 @@ typedef uint64_t time64;
 #define BOOL_NAGETIVE 0
 #define IPFS_HASH_LENGHT 46
 
-enum ensure_right_class : uint8_t  // 卡片的类型 总共五种属性类型,总共17张卡牌
+enum ensure_right_class : uint8_t  // 确权类型
 {
     EMPTY = 0,        // 空
     COLLECTION = 1,   // 采集确权

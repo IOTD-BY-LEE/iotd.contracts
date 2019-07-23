@@ -225,4 +225,4 @@ void accounting::listrecord(name from, uint64_t seq, vector<account_record_conte
 #endif
 } // namespace vankia
 
-EOSIO_DISPATCH(vankia::trans, (deposit)(withdraw)(listrecord)(authrightreg))
+EOSIO_DISPATCH(vankia::trans, (ensureright)(batchtransf)(deposit)(withdraw)(listrecord)(authrightreg))
