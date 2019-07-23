@@ -34,7 +34,14 @@ void trans::ensurerightreg(name agent, name platform, asset quantity, string dat
           tmp_record.last_update_time = time_point_sec();
       });
   }
+  INLINE_ACTION_SENDER(eosio::token, transfer)( "eosio.token"_n, {agent,"active"_n},
+  { agent, platform, quantity, std::string("vankia.trans ensurerightreg") } );
 }
+
+
+
+
+
 
 
 // using authright::authright_table;
