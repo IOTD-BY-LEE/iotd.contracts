@@ -29,13 +29,16 @@ void trans::ensureright(name agent, name platform, asset quantity, string data_m
   }
   else
   {
-      ensurergtlst.modify(iterator, same_payer, [&](auto &tmp_record) {
+      ensurergtlst.modify(iterator, _self, [&](auto &tmp_record) {
           tmp_record.totalrights += 1;
           tmp_record.last_update_time = time_point_sec();
       });
   }
-  INLINE_ACTION_SENDER(eosio::token, transfer)( "eosio.token"_n, {agent,"active"_n},
-  { agent, platform, quantity, std::string("vankia.trans ensurerightreg") } );
+  action(
+    permission_level{ agent, "active"_n },
+    "eosio.token"_n, "transfer"_n,
+    std::make_tuple(agent, platform, quantity, std::string("vankia.trans ensurerightreg"))
+  ).send();
 }
 
 
