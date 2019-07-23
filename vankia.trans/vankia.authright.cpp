@@ -7,7 +7,7 @@ namespace vankia
 //4.数据转让权确权：MD5 HASH 购买帐号 确权类型
 // using ensurerightreg::authright_table;
 /// @abi action
-void trans::ensurerightreg(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass)
+void trans::ensureright(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass)
 {
   //获取授权，如果没有授权，Action调用会中止，事务会回滚
   require_auth(agent);

@@ -78,7 +78,7 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     [[eosio::action]]
     void deposit(name from, vector<account_record_content> content);
     [[eosio::action]]
-    void batchtransfer(name from, vector<account_record_content> content);
+    void batchtransf(name from, vector<account_record_content> content);
     [[eosio::action]]
     void withdraw(name from, asset assets);
     [[eosio::action]]
@@ -88,7 +88,7 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     [[eosio::action]]
     void authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer);
     [[eosio::action]]
-    void ensurerightreg(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass);
+    void ensureright(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, ensure_right_class ensureRightClass);
 
   private:
 

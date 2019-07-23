@@ -73,7 +73,7 @@ void trans::deposit(name from, vector<account_record_content> content)
 }
 
 
-void trans::batchtransfer(name from, vector<account_record_content> content)
+void trans::batchtransf(name from, vector<account_record_content> content)
 {
     require_auth(from);
 
