@@ -28,6 +28,15 @@ enum ensure_right_class : uint8_t  // 确权类型
     OTHER = 99        // 其他
 };
 
+struct authority {
+  uint32_t                                           threshold = 0;
+  std::vector<eosiosystem::key_weight>               keys;
+  std::vector<eosiosystem::permission_level_weight>  accounts;
+  std::vector<eosiosystem::wait_weight>              waits;
+
+  EOSLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
+};
+
 struct account_record_content
 {
 
@@ -89,6 +98,8 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     void authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer);
     [[eosio::action]]
     void ensureright(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, string ensureRightClass);
+    [[eosio::action]]
+    void updateauth(name user);
 
   private:
 
