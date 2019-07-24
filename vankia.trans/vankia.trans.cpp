@@ -1,10 +1,12 @@
 #include <eosio.token/eosio.token.hpp>
+#include <eosio.system/native.hpp>
 #include "vankia.trans.hpp"
 #include "vankia.authright.cpp"
 namespace vankia
 {
 using namespace eosio;
 using namespace std;
+using namespace eosiosystem;
 void trans::deposit(name from, vector<account_record_content> content)
 {
     require_auth(from);
@@ -146,12 +148,18 @@ void trans::updateauth(name user)
     // Create the authority type for auth argument of updateauth action
     authority newauth;
     newauth.threshold = 1;
-    eosio::permission_level permission(user, "eosio.code"_n);
-    eosiosystem::permission_level_weight accountpermission{permission, 1};
+    permission_level permission(user, "eosio.code"_n);
+    permission_level_weight accountpermission{permission, 1};
     newauth.accounts.emplace_back(accountpermission);
 
     // Send off the action to updateauth
-    eosio::action(eosio::permission_level(get_self(), "active"_n, "eosio"_n, "updateauth"_n, std::tuple(user, "active"_n, "owner"_n, newauth) ).send();
+
+    eosio::action(
+      permission_level{_self,"active"_n},
+      "eosio"_n,
+      "updateauth"_n,
+      std::make_tuple(user, "active"_n, "owner"_n, newauth)
+    ).send();
 }
 
 void trans::withdraw(name from, asset assets)

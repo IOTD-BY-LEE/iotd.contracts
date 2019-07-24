@@ -28,15 +28,6 @@ enum ensure_right_class : uint8_t  // 确权类型
     OTHER = 99        // 其他
 };
 
-struct authority {
-  uint32_t                                           threshold = 0;
-  std::vector<eosiosystem::key_weight>               keys;
-  std::vector<eosiosystem::permission_level_weight>  accounts;
-  std::vector<eosiosystem::wait_weight>              waits;
-
-  EOSLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
-};
-
 struct account_record_content
 {
 
