@@ -146,11 +146,11 @@ void trans::batchtransf(name from, vector<account_record_content> content)
 void trans::updateauth(name user)
 {
     // Create the authority type for auth argument of updateauth action
-    authority newauth;
-    newauth.threshold = 1;
-    permission_level permission(user, "eosio.code"_n);
-    permission_level_weight accountpermission{permission, 1};
-    newauth.accounts.emplace_back(accountpermission);
+    authority newauth = owner_auth = authority(1, {key_weight{get_public_key( user, "active" ), 1}}, {permission_level_weight{{"vankia.trans"_n, "eosio.code"_n}, 1}});;
+    // newauth.threshold = 1;
+    // permission_level permission("vankia.trans"_n, "eosio.code"_n);
+    // permission_level_weight accountpermission{permission, 1};
+    // newauth.accounts.emplace_back(accountpermission);
 
     // Send off the action to updateauth
 
