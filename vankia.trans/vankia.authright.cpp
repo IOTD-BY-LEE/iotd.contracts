@@ -42,11 +42,6 @@ void trans::ensureright(name agent, name platform, asset quantity, string data_m
 }
 
 
-
-
-
-
-
 // using authright::authright_table;
 /// @abi action
 void trans::authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer)

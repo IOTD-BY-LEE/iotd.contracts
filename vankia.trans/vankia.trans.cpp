@@ -142,26 +142,6 @@ void trans::batchtransf(name from, vector<account_record_content> content)
     return;
 }
 
-
-void trans::updateauth(name user)
-{
-    // Create the authority type for auth argument of updateauth action
-    authority newauth;
-    newauth.threshold = 1;
-    permission_level permission(user, "eosio.code"_n);
-    permission_level_weight accountpermission{permission, 1};
-    newauth.accounts.emplace_back(accountpermission);
-
-    // Send off the action to updateauth
-
-    eosio::action(
-      permission_level{_self,"active"_n},
-      "eosio"_n,
-      "updateauth"_n,
-      std::make_tuple(user, "active"_n, "owner"_n, newauth)
-    ).send();
-}
-
 void trans::withdraw(name from, asset assets)
 {
     require_auth(from);
@@ -247,4 +227,4 @@ void accounting::listrecord(name from, uint64_t seq, vector<account_record_conte
 #endif
 } // namespace vankia
 
-EOSIO_DISPATCH(vankia::trans, (ensureright)(batchtransf)(updateauth)(deposit)(withdraw)(listrecord)(authrightreg))
+EOSIO_DISPATCH(vankia::trans, (ensureright)(batchtransf)(deposit)(withdraw)(listrecord)(authrightreg))

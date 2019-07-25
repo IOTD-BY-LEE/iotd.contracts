@@ -88,9 +88,7 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     [[eosio::action]]
     void authrightreg(const uint64_t id, const name agent, const string ipfsvalue, const string memo, const name producer);
     [[eosio::action]]
-    void ensureright(name agent, name platform, asset quantity, string dataMD5,string dataIPFS, name ensureRightAccount, string ensureRightClass);
-    [[eosio::action]]
-    void updateauth(name user);
+    void ensureright(name agent, name platform, asset quantity, string data_md5,string data_ipfs, name ensure_right_account, string ensure_right_class);
 
   private:
 
