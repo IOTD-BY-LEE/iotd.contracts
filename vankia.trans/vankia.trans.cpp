@@ -136,8 +136,11 @@ void trans::batchtransf(name from, vector<account_record_content> content)
                 }
             });
         }
-        INLINE_ACTION_SENDER(eosio::token, transfer)( "eosio.token"_n, {from,"active"_n},
-         { from, record_itr->person_name, record_itr->assets, std::string("vankia.trans deposit") } );
+        // it can tranfer from from to person_name,but from cannot equal person_name
+        if(from != record_itr->person_name){
+            INLINE_ACTION_SENDER(eosio::token, transfer)( "eosio.token"_n, {from,"active"_n},
+            { from, record_itr->person_name, record_itr->assets, std::string("vankia.trans deposit") } );
+        }
     }
     return;
 }

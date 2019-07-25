@@ -34,11 +34,15 @@ void trans::ensureright(name agent, name platform, asset quantity, string data_m
           tmp_record.last_update_time = time_point_sec();
       });
   }
-  action(
-    permission_level{ agent, "active"_n },
-    "eosio.token"_n, "transfer"_n,
-    std::make_tuple(agent, platform, quantity, std::string("vankia.trans ensureright"))
-  ).send();
+  
+  // it can tranfer from agent to platform,but agent cannot equal platform
+  if(agent != platform){
+    action(
+      permission_level{ agent, "active"_n },
+      "eosio.token"_n, "transfer"_n,
+      std::make_tuple(agent, platform, quantity, std::string("vankia.trans ensureright"))
+    ).send();
+  }
 }
 
 
