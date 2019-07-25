@@ -37,7 +37,7 @@ void trans::ensureright(name agent, name platform, asset quantity, string data_m
   action(
     permission_level{ agent, "active"_n },
     "eosio.token"_n, "transfer"_n,
-    std::make_tuple(agent, platform, quantity, std::string("vankia.trans ensurerightreg"))
+    std::make_tuple(agent, platform, quantity, std::string("vankia.trans ensureright"))
   ).send();
 }
 
