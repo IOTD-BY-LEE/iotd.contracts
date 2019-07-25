@@ -75,7 +75,7 @@ void trans::deposit(name from, vector<account_record_content> content)
 }
 
 
-void trans::batchtransf(name from, vector<account_record_content> content)
+void trans::batchtransf(name from, vector<account_record_content> content, string trading_data_txid, string trading_class)
 {
     require_auth(from);
 

@@ -78,7 +78,7 @@ class [[eosio::contract("vankia.trans")]] trans : public vankia::contract
     [[eosio::action]]
     void deposit(name from, vector<account_record_content> content);
     [[eosio::action]]
-    void batchtransf(name from, vector<account_record_content> content);
+    void batchtransf(name from, vector<account_record_content> content, string trading_data_txid, string trading_class);
     [[eosio::action]]
     void withdraw(name from, asset assets);
     [[eosio::action]]
