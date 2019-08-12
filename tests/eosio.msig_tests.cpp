@@ -208,7 +208,11 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_execute, eosio_msig_tester ) try {
    );
 
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
                   ("proposal_name", "first")
@@ -290,7 +294,11 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_by_two, eosio_msig_tester ) try {
    );
 
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
@@ -369,7 +377,11 @@ BOOST_FIXTURE_TEST_CASE( big_transaction, eosio_msig_tester ) try {
    );
 
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
@@ -402,7 +414,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, eosio_msig_tester )
    set_producers( {N(alice),N(bob),N(carol)} );
    produce_blocks(50);
 
-   create_accounts( { N(eosio.token) } );
+   create_accounts( { N(eosio.token), N(eosio.rex) } );
    set_code( N(eosio.token), contracts::token_wasm() );
    set_abi( N(eosio.token), contracts::token_abi().data() );
 
@@ -431,7 +443,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, eosio_msig_tester )
 
    vector<permission_level> action_perm = {{N(eosio), config::active_name}};
 
-   auto wasm = contracts::util::test_api_wasm();
+   auto wasm = contracts::util::reject_all_wasm();
 
    variant pretty_trx = fc::mutable_variant_object()
       ("expiration", "2020-01-01T00:30")
@@ -485,7 +497,11 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, eosio_msig_tester )
    );
    // execute by alice to replace the eosio system contract
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
@@ -497,10 +513,10 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, eosio_msig_tester )
    BOOST_REQUIRE_EQUAL( 1, trace->action_traces.size() );
    BOOST_REQUIRE_EQUAL( transaction_receipt::executed, trace->receipt->status );
 
-   // can't create account because system contract was replace by the test_api contract
+   // can't create account because system contract was replaced by the reject_all contract
 
    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( N(alice1111112), N(eosio), core_sym::from_string("1.0000"), false ),
-                            eosio_assert_message_exception, eosio_assert_message_is("Unknown Test")
+                            eosio_assert_message_exception, eosio_assert_message_is("rejecting all actions")
 
    );
 } FC_LOG_AND_RETHROW()
@@ -517,7 +533,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, eosio_msig_tester
    set_producers( {N(alice),N(bob),N(carol), N(apple)} );
    produce_blocks(50);
 
-   create_accounts( { N(eosio.token) } );
+   create_accounts( { N(eosio.token), N(eosio.rex) } );
    set_code( N(eosio.token), contracts::token_wasm() );
    set_abi( N(eosio.token), contracts::token_abi().data() );
 
@@ -546,7 +562,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, eosio_msig_tester
 
    vector<permission_level> action_perm = {{N(eosio), config::active_name}};
 
-   auto wasm = contracts::util::test_api_wasm();
+   auto wasm = contracts::util::reject_all_wasm();
 
    variant pretty_trx = fc::mutable_variant_object()
       ("expiration", "2020-01-01T00:30")
@@ -611,7 +627,11 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, eosio_msig_tester
    );
    // execute by alice to replace the eosio system contract
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    // execute by another producer different from proposer
    push_action( N(apple), N(exec), mvo()
@@ -624,10 +644,10 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, eosio_msig_tester
    BOOST_REQUIRE_EQUAL( 1, trace->action_traces.size() );
    BOOST_REQUIRE_EQUAL( transaction_receipt::executed, trace->receipt->status );
 
-   // can't create account because system contract was replace by the test_api contract
+   // can't create account because system contract was replaced by the reject_all contract
 
    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( N(alice1111112), N(eosio), core_sym::from_string("1.0000"), false ),
-                            eosio_assert_message_exception, eosio_assert_message_is("Unknown Test")
+                            eosio_assert_message_exception, eosio_assert_message_is("rejecting all actions")
 
    );
 } FC_LOG_AND_RETHROW()
@@ -709,7 +729,11 @@ BOOST_FIXTURE_TEST_CASE( propose_invalidate_approve, eosio_msig_tester ) try {
 
    //successfully execute
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    push_action( N(bob), N(exec), mvo()
                   ("proposer",      "alice")
@@ -748,7 +772,12 @@ BOOST_FIXTURE_TEST_CASE( approve_execute_old, eosio_msig_tester ) try {
    );
 
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
+
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
                   ("proposal_name", "first")
@@ -847,7 +876,11 @@ BOOST_FIXTURE_TEST_CASE( approve_by_two_old, eosio_msig_tester ) try {
    );
 
    transaction_trace_ptr trace;
-   control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
 
    push_action( N(alice), N(exec), mvo()
                   ("proposer",      "alice")
@@ -859,6 +892,97 @@ BOOST_FIXTURE_TEST_CASE( approve_by_two_old, eosio_msig_tester ) try {
    BOOST_REQUIRE_EQUAL( 1, trace->action_traces.size() );
    BOOST_REQUIRE_EQUAL( transaction_receipt::executed, trace->receipt->status );
 
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( approve_with_hash, eosio_msig_tester ) try {
+   auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
+   auto trx_hash = fc::sha256::hash( trx );
+   auto not_trx_hash = fc::sha256::hash( trx_hash );
+
+   push_action( N(alice), N(propose), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("trx",           trx)
+                  ("requested", vector<permission_level>{{ N(alice), config::active_name }})
+   );
+
+   //fail to approve with incorrect hash
+   BOOST_REQUIRE_EXCEPTION( push_action( N(alice), N(approve), mvo()
+                                          ("proposer",      "alice")
+                                          ("proposal_name", "first")
+                                          ("level",         permission_level{ N(alice), config::active_name })
+                                          ("proposal_hash", not_trx_hash)
+                            ),
+                            eosio::chain::crypto_api_exception,
+                            fc_exception_message_is("hash mismatch")
+   );
+
+   //approve and execute
+   push_action( N(alice), N(approve), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("level",         permission_level{ N(alice), config::active_name })
+                  ("proposal_hash", trx_hash)
+   );
+
+   transaction_trace_ptr trace;
+   control->applied_transaction.connect(
+   [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> p ) {
+      const auto& t = std::get<0>(p);
+      if( t->scheduled ) { trace = t; }
+   } );
+
+   push_action( N(alice), N(exec), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("executer",      "alice")
+   );
+
+   BOOST_REQUIRE( bool(trace) );
+   BOOST_REQUIRE_EQUAL( 1, trace->action_traces.size() );
+   BOOST_REQUIRE_EQUAL( transaction_receipt::executed, trace->receipt->status );
+} FC_LOG_AND_RETHROW()
+
+BOOST_FIXTURE_TEST_CASE( switch_proposal_and_fail_approve_with_hash, eosio_msig_tester ) try {
+   auto trx1 = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
+   auto trx1_hash = fc::sha256::hash( trx1 );
+
+   push_action( N(alice), N(propose), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("trx",           trx1)
+                  ("requested", vector<permission_level>{{ N(alice), config::active_name }})
+   );
+
+   auto trx2 = reqauth("alice",
+                       { permission_level{N(alice), config::active_name},
+                         permission_level{N(alice), config::owner_name}  },
+                       abi_serializer_max_time );
+
+   push_action( N(alice), N(cancel), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("canceler",       "alice")
+   );
+
+   push_action( N(alice), N(propose), mvo()
+                  ("proposer",      "alice")
+                  ("proposal_name", "first")
+                  ("trx",           trx2)
+                  ("requested", vector<permission_level>{ { N(alice), config::active_name },
+                                                          { N(alice), config::owner_name } })
+   );
+
+   //fail to approve with hash meant for old proposal
+   BOOST_REQUIRE_EXCEPTION( push_action( N(alice), N(approve), mvo()
+                                          ("proposer",      "alice")
+                                          ("proposal_name", "first")
+                                          ("level",         permission_level{ N(alice), config::active_name })
+                                          ("proposal_hash", trx1_hash)
+                            ),
+                            eosio::chain::crypto_api_exception,
+                            fc_exception_message_is("hash mismatch")
+   );
 } FC_LOG_AND_RETHROW()
 
 BOOST_AUTO_TEST_SUITE_END()
