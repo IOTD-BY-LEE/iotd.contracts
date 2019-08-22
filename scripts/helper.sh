@@ -26,7 +26,7 @@ function check-version-numbers() {
 # Handles choosing which EOSIO directory to select when the default location is used.
 function default-eosio-directories() {
   REGEX='^[0-9]+([.][0-9]+)?$'
-  ALL_EOSIO_SUBDIRS=($(ls ${HOME}/eosio | sort -V))
+  ALL_EOSIO_SUBDIRS=($(ls ${HOME}/vktio | sort -V))
   for ITEM in "${ALL_EOSIO_SUBDIRS[@]}"; do
     if [[ "$ITEM" =~ $REGEX ]]; then
       DIR_MAJOR=$(echo $ITEM | cut -f1 -d '.')
@@ -55,7 +55,7 @@ function eosio-directory-prompt() {
           echo "No default EOSIO installations detected..."
           PROCEED=n
         else
-          printf "Is EOSIO installed in the default location: $HOME/eosio/$EOSIO_VERSION (y/n)" && read -p " " PROCEED
+          printf "Is EOSIO installed in the default location: $HOME/vktio/$EOSIO_VERSION (y/n)" && read -p " " PROCEED
         fi
       fi
       echo ""
@@ -67,7 +67,7 @@ function eosio-directory-prompt() {
         1 | false | [Nn]* )
           if [[ $PROMPT_EOSIO_DIRS ]]; then
             echo "Found these compatible EOSIO versions in the default location."
-            printf "$HOME/eosio/%s\n" "${PROMPT_EOSIO_DIRS[@]}"
+            printf "$HOME/vktio/%s\n" "${PROMPT_EOSIO_DIRS[@]}"
           fi
           printf "Enter the installation location of EOSIO:" && read -e -p " " EOSIO_DIR_PROMPT;
           break;;
@@ -76,7 +76,7 @@ function eosio-directory-prompt() {
       esac
     done
   fi
-  export EOSIO_INSTALL_DIR="${EOSIO_DIR_PROMPT:-${HOME}/eosio/${EOSIO_VERSION}}"
+  export EOSIO_INSTALL_DIR="${EOSIO_DIR_PROMPT:-${HOME}/vktio/${EOSIO_VERSION}}"
 }
 
 
