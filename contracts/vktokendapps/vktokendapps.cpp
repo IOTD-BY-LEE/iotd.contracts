@@ -56,10 +56,10 @@ CONTRACT vktokendapps : public eosio::contract {
 public:
     vktokendapps(name self, name first_receiver, datastream<const char *> ds) :
             contract(self, first_receiver, ds), users(self, self.value) ,administer(self,self.value)
-            {
+    {
 
 
-            }
+    }
 
     /**
      * 每日签到领币
@@ -68,6 +68,7 @@ public:
         require_auth(get_self());
 
         uint8_t reward_times = 1;                      //奖励倍数，默认为1倍
+        auto tokens = asset(0,TOKEN_SYMBOL);
         auto adm_itr = administer.find(name("xinyue").value);
         if(adm_itr != administer.end())
         {
@@ -95,15 +96,14 @@ public:
                 user.like_times = 0;
             });
 
-            auto tokens = get_reward(account, 1, reward_times);                   //第一次签到获得奖励
+            tokens = asset(get_reward(account, 1, reward_times),TOKEN_SYMBOL);             //第一次签到获得奖励
             users.modify(itr,get_self(), [&](auto &user) {
                 user.sign_in_accumulate_days += 1;                                         //连续签到天数,这里应该是第一天
-                user.balance = asset(tokens, TOKEN_SYMBOL);
-                user.last_reward_amount = asset(tokens, TOKEN_SYMBOL);
-
+                user.balance = tokens;
+                user.last_reward_amount = tokens;
                 user.last_reward_time = time_point_sec(current_time_point());               //最用最后的签到时间，其实可以在签到数组中取
                 user.recent_days[0] = user.last_reward_time;                                //存储用户最近七次的签到时间
-                user.recent_rewards[0] = asset(tokens, TOKEN_SYMBOL);                       //用户最近七次的签到奖励
+                user.recent_rewards[0] = tokens;                                            //用户最近七次的签到奖励
             });
 
         }
@@ -120,18 +120,18 @@ public:
                     user.sign_in_accumulate_days = 1;                                         //用户连续签到天数改为一天
                 });
 
-                auto tokens = get_reward(account,itr->sign_in_accumulate_days,reward_times);  //根据签到时间生成奖励
+                tokens = asset(get_reward(account,itr->sign_in_accumulate_days,reward_times),TOKEN_SYMBOL);  //根据签到时间生成奖励
 
                 users.modify(itr,get_self(),[&](auto& user){
-                   user.last_reward_amount = asset(tokens,TOKEN_SYMBOL);                      //最后一次签到所得
-                   user.balance += asset(tokens,TOKEN_SYMBOL);                                //代币总金额
-                   user.recent_rewards[0] = asset(tokens,TOKEN_SYMBOL);                       //由于中断签到，所以清除其签到奖励记录，并将今日奖励放入首位
-                   user.recent_days[0] = user.last_reward_time;                               //由于中断签到，所以清除其签到日期记录，并将今日日期放入首位
-                   for(int i = 1;i < 7; ++i)
-                   {
-                       user.recent_rewards[i] = asset(0,TOKEN_SYMBOL);                        //清除其签到奖励记录
-                       user.recent_days[i] = time_point_sec(0);                               //清除其签到日期记录
-                   }
+                    user.last_reward_amount = tokens;                      //最后一次签到所得
+                    user.balance += tokens;                                //代币总金额
+                    user.recent_rewards[0] = tokens;                       //由于中断签到，所以清除其签到奖励记录，并将今日奖励放入首位
+                    user.recent_days[0] = user.last_reward_time;                               //由于中断签到，所以清除其签到日期记录，并将今日日期放入首位
+                    for(int i = 1;i < 7; ++i)
+                    {
+                        user.recent_rewards[i] = asset(0,TOKEN_SYMBOL);                        //清除其签到奖励记录
+                        user.recent_days[i] = time_point_sec(0);                               //清除其签到日期记录
+                    }
                 });
             }
             else        //如果没有中断
@@ -142,17 +142,17 @@ public:
                     user.last_reward_time = time_point_sec(current_time_point());              //更新签到时间
                 });
                 //计算累计应得奖励
-                auto tokens = get_reward(account,itr->sign_in_accumulate_days,reward_times);
+                tokens = asset(get_reward(account,itr->sign_in_accumulate_days,reward_times),TOKEN_SYMBOL);
 
                 users.modify(itr,get_self(),[&](auto &user){
-                    user.last_reward_amount = asset(tokens,TOKEN_SYMBOL);
-                    user.balance += asset(tokens,TOKEN_SYMBOL);
+                    user.last_reward_amount = tokens;
+                    user.balance += tokens;
                 });
 
                 if( itr->sign_in_accumulate_days <= 7) //如果签到时间不足七天
                 {
                     users.modify(itr,get_self(),[&](auto& user){
-                        user.recent_rewards[ user.sign_in_accumulate_days - 1] = asset(tokens,TOKEN_SYMBOL);
+                        user.recent_rewards[ user.sign_in_accumulate_days - 1] = tokens;
                         user.recent_days[ user.sign_in_accumulate_days - 1] = user.last_reward_time;
                     });
                 }
@@ -164,7 +164,7 @@ public:
                             user.recent_rewards[i] = user.recent_rewards[i + 1];
                             user.recent_days[i] = user.recent_days[i + 1];
                         }
-                        user.recent_rewards[6] = asset(tokens,TOKEN_SYMBOL);
+                        user.recent_rewards[6] = tokens;
                         user.recent_days[6] = user.last_reward_time;
 
                     });
@@ -173,6 +173,7 @@ public:
 
             }
         }
+        transfer_token(account,tokens);
     }
 
     //传进来一个倍数
@@ -525,7 +526,7 @@ private:
     {
         name account;
         uint8_t times;    //活动倍率
-                          //其他活动再添加
+        //其他活动再添加
         uint64_t primary_key() const{ return account.value; }
     };
     typedef multi_index<"admintable"_n,admintable> admin_t;
@@ -617,3 +618,4 @@ private:
 };
 
 EOSIO_DISPATCH(vktokendapps, (reward)(startactive))
+
