@@ -308,7 +308,7 @@ namespace eosiosystem {
          }
          else
          {
-            tmp = newact >> (4+(12-len)*5);
+            tmp = newact.value >> (4+(12-len)*5);
             for( uint32_t i = 0; i < len; ++i ) {
                has_dot |= !(tmp & 0x1f);
                tmp >>= 5;
