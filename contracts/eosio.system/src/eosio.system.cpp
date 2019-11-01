@@ -302,18 +302,12 @@ namespace eosiosystem {
          //   tmp >>= 5;
          // }
          size_t len = (newact.to_string()).length();
-         if(5>len)
-         {
-	         has_dot = true;
+         tmp = newact.value >> (4+(12-len)*5);
+         for( uint32_t i = 0; i < len; ++i ) {
+            has_dot |= !(tmp & 0x1f);
+            tmp >>= 5;
          }
-         else
-         {
-            tmp = newact.value >> (4+(12-len)*5);
-            for( uint32_t i = 0; i < len; ++i ) {
-               has_dot |= !(tmp & 0x1f);
-               tmp >>= 5;
-	         }
-	      }
+
          if( has_dot ) { // or is less than 12 characters
             auto suffix = newact.suffix();
             if( suffix == newact ) {
