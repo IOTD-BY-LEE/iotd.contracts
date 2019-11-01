@@ -301,7 +301,7 @@ namespace eosiosystem {
          //   has_dot |= !(tmp & 0x1f);
          //   tmp >>= 5;
          // }
-         size_t len = ((name{newact}).to_string()).length();
+         size_t len = (newact.to_string()).length();
          if(5>len)
          {
 	         has_dot = true;
